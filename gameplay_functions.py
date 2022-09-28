@@ -27,10 +27,10 @@ def winnerCheck(list):
     list.pop()
     return list == sorted(list)
 
-def textDisplay(font, text, color, WIN_WIDTH):
+def textDisplay(font, text, color, WIN_WIDTH, WIN_HEIGHT, height):
   text = font.render(text, True, color)
   textRect = text.get_rect()
-  textRect.center = (WIN_WIDTH//2-150//2, 25)
+  textRect.center = (WIN_WIDTH//2-WIN_HEIGHT//2, height)
 
   return text, textRect
 
@@ -48,8 +48,7 @@ def getInversionCount(list):
   return inversionCount
 
 def isSolvable(list):
-  if getInversionCount(list) % 2 != 0:
-    print("Puzzle is Not Solvable!")
+  return getInversionCount(list) % 2 == 0
 
 def addTiles():
 	# y coordinate will start at 50; x at 0
@@ -84,20 +83,17 @@ def swapCells(list, i, j, row_clicked, col_clicked):
 
   return list
 
-def swapTiles(tiles_list, terminal_list, screen):
-  printTiles(tiles_list, terminal_list, screen)
-
 def calculateCoordinate(tiles_list, x, y):
   # check which cell being clicked by calculating which x and y ranges it belongs to
   # (checking kung anong current position niya sa screen)
   for i in range(3):
     for j in range(3):
       tiles = tiles_list[i][j]
-      if x in range(tiles.x_pos, tiles.x_pos+100) and y in range(tiles.y_pos, tiles.y_pos+100):
+      if tiles.isClicked(x, y):
         print(f'coordinates being clicked: ({i}, {j})')
         return i, j
 
-def gameplay(terminal_list, tiles_list, row_clicked, col_clicked):
+def gameplay(terminal_list, row_clicked, col_clicked):
   for i in range(row_clicked-1, row_clicked+2):
     for j in range(col_clicked-1, col_clicked+2): # check neighboring cells
       if ((i == row_clicked-1 and j == col_clicked) or (i == row_clicked and j == col_clicked-1) or (i == row_clicked and j == col_clicked+1) or (i == row_clicked+1 and j == col_clicked)):
@@ -110,7 +106,6 @@ def gameplay(terminal_list, tiles_list, row_clicked, col_clicked):
             print(f"empty cell found: ({i}, {j})")
 
             terminal_list = swapCells(terminal_list, i, j, row_clicked, col_clicked)
-            tiles_list = swapTiles(tiles_list, i, j, row_clicked, col_clicked)
 
             continue
 					

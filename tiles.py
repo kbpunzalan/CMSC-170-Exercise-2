@@ -11,3 +11,6 @@ class Tiles:
 
     font = pygame.font.Font('freesansbold.ttf', 20)
     screen.blit(font.render(str(terminal_list[i][j]), True, FONT_COLOR), ((self.x_pos+self.x_pos+95)*0.5, (self.y_pos+self.y_pos+95)*0.5))
+
+  def isClicked(self, x, y):
+    return x in range(self.x_pos, self.x_pos+100) and y in range(self.y_pos, self.y_pos+100)

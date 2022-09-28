@@ -3,7 +3,6 @@
 # CMSC 170 X-4L
 # Exer 01
 
-from asyncio.windows_events import NULL
 import pygame
 import time
 from gameplay_functions import *
@@ -30,9 +29,15 @@ pygame.display.set_icon(icon)
 
 
 font = pygame.font.Font('freesansbold.ttf', 20)
-not_solvable, textRect = textDisplay(font, 'Puzzle is not Solvable!', RED, WIN_WIDTH)
-won, textRect_won = textDisplay(font, 'You Win!', BLACK, WIN_WIDTH)
+not_solvable, textRect = textDisplay(font, 'Puzzle is not Solvable!', RED, WIN_WIDTH, 150, 25)
+won, textRect_won = textDisplay(font, 'You Win!', BLACK, WIN_WIDTH, 150, 25)
 
+# if number of inversions is odd, it is not solvable
+is_solvable = True
+if not isSolvable(terminal_list):
+  is_solvable = False
+
+is_path_seen = False
 is_next_running = False
 is_playable = True
 is_bfs_clicked = ""
@@ -46,18 +51,26 @@ while is_running:
     if event.type == pygame.QUIT:
       is_running = False
 
-  # renders all tiles
+  # renders/reprints all tiles
   printTiles(tiles_list, terminal_list, screen, PINK_100, BLACK)
     
   # if number of inversions is odd, it is not solvable
-  if getInversionCount(terminal_list) % 2 != 0:
+  if not is_solvable:
     screen.blit(not_solvable, textRect)
 
   if winnerCheck(terminal_list):
     screen.blit(won, textRect_won)
     printTiles(tiles_list, terminal_list, screen, PINK_50, BLACK_50)
     is_playable = False # user will not be able to click anymore
-  
+    is_path_seen = False
+
+  if is_path_seen:
+    pathText, pathTextRect = textDisplay(font, f"Path Cost: {str(path_cost)}", BLACK, WIN_WIDTH, 150, 25)
+    screen.blit(pathText, pathTextRect)
+
+    path_list_text, path_list_rect = textDisplay(font, f"Path: {outputPath}", BLACK, WIN_WIDTH*2, WIN_HEIGHT*2, WIN_HEIGHT-50)
+    screen.blit(path_list_text, path_list_rect)
+
   # BFS-DFS Specs
   solution = Button(400, 285, "Solution")
   solution.drawTile(screen, PINK_100, BLACK)
@@ -75,16 +88,25 @@ while is_running:
   elif (is_bfs_clicked == "2"):
     clickedBfsDfs(screen, dfs, bfs, PINK_100, PINK_50, BLACK, BLACK_50)
 
-
   # GAMEPLAY
   if event.type == pygame.MOUSEBUTTONDOWN:
     try:
       x, y = pygame.mouse.get_pos()
       
       if next.isClicked(x, y):
-        print("Hi!")
+        if (currentState):
+          i, j = findEmpty(terminal_list)
 
-      if (x <= 400): # tiles are being checked
+          match actions_string_list[actions_index]:
+            case "L": terminal_list = swapCells(terminal_list, i, j, i, j-1)
+            case "R": terminal_list = swapCells(terminal_list, i, j, i, j+1)
+            case "U": terminal_list = swapCells(terminal_list, i, j, i-1, j)
+            case "D": terminal_list = swapCells(terminal_list, i, j, i+1, j)
+
+        actions_index += 1
+
+
+      if (x <= 400): # tiles are being checked/played
         row_clicked, col_clicked = calculateCoordinate(tiles_list, x, y)
 
         printArray(terminal_list)
@@ -93,7 +115,7 @@ while is_running:
           if terminal_list[row_clicked][col_clicked] == 0:
             print("You cannot click this cell")
           else:
-            gameplay(terminal_list, tiles_list, row_clicked, col_clicked)
+            gameplay(terminal_list, row_clicked, col_clicked)
       else: # specification for BFS and DFS
         if (dfs.isClicked(x, y)):
           is_bfs_clicked = "2"
@@ -106,23 +128,35 @@ while is_running:
           to_be_solved = "bfs"
 
         if (solution.isClicked(x, y) and (to_be_solved == "bfs" or to_be_solved == "dfs")):
-            if getInversionCount(terminal_list) % 2 != 0:
+            is_playable = False
+
+            terminal_list = readFile()
+
+            if not isSolvable(terminal_list):
               print("Puzzle is Not Solvable!")
             else:
               print(f"Solution for {to_be_solved}")
               is_next_running = True
 
               i, j = findEmptyCell(terminal_list)
-              initial = Node(terminal_list, i, j, "", NULL)
+              initial = Node(terminal_list, i, j, None, None)
               
-              BFSearch(initial)
+              if (to_be_solved == "bfs"):
+                currentState = BFS_DFS(initial)
+              else:
+                currentState = BFS_DFS(initial)
 
-            terminal_list = readFile()
+              actions_string_list, path_cost = findPath(currentState)
+              actions_index = 0
+              print(actions_string_list)
+              fileWrite(actions_string_list)
+              is_path_seen = True
 
+              outputPath = readOutputFile()
 
     except TypeError:
       print("This area cannot be clicked")
-  # time.sleep(0.06)
+  # time.sleep(0.03)
   pygame.display.update()
   
 pygame.quit()
