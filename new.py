@@ -1,3 +1,4 @@
+from operator import ne
 import pygame
 import time
 from gameplay_functions import winnerCheck, swapCells, printArray
@@ -58,90 +59,45 @@ def Actions(currentState):
       print("====PARENT====")
       printArray(currentState.board)
       print("==============\n")
-
+      print("=====CHILD=====")
       temp_board = swapCells(new_board, i, j, i-1, j)
-      new_node = Node(temp_board, i-1, j, "U", currentState)
-      action_list.append(new_node)
-
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
+      printArray(temp_board)
       print("===============\n")
   except IndexError:
     pass
 
   try:
-    if i >= 0 and j+1 >= 0:
+    if i >= 0 and j >= 0:
       new_board = copyBoard(currentState.board)
       #swapping to UP
       print("====PARENT====")
+      printArray(new_board)
       printArray(currentState.board)
       print("==============\n")
-
+      print("=====CHILD=====")
       temp_board = swapCells(new_board, i, j, i, j+1)
-      new_node = Node(temp_board, i, j+1, "R", currentState)
-      action_list.append(new_node)
-
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
+      printArray(temp_board)
       print("===============\n")
   except IndexError:
     pass
 
-  try:
-    if i+1 >= 0 and j >= 0:
-      new_board = copyBoard(currentState.board)
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
 
-      temp_board = swapCells(new_board, i+1, j, i, j)
-      new_node = Node(temp_board, i+1, j, "D", currentState)
-      action_list.append(new_node)
 
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
 
-  try:
-    if i >= 0 and j-1 >= 0:
-      new_board = copyBoard(currentState.board)
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
+  # newNode = swapping(currentState, -1, 0, "U")
+  # action_list = addToActions(newNode, action_list)
 
-      temp_board = swapCells(new_board, i, j-1, i, j)
-      new_node = Node(temp_board, i, j-1, "L", currentState)
-      action_list.append(new_node)
+  # newNode = swapping(currentState, 1, 0, "D")
+  # action_list = addToActions(newNode, action_list)
 
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
+  # newNode = swapping(currentState, 0, -1, "L")
+  # action_list = addToActions(newNode, action_list)
 
-  print(len(action_list))
+  # newNode = swapping(currentState, 0, +1, "R")
+  # action_list = addToActions(newNode, action_list)
 
-  return action_list
+  # print(len(action_list))
+  # return action_list
 
 def inExploredOrFrontier(node, explored):
   for item in explored:
@@ -153,21 +109,23 @@ def BFS_DFS(initial):
   frontier = [initial]
   explored = []
 
-  while (frontier):
-    currentState = frontier.pop(-1)
-      # printArray(currentState.board)
-      # if None in frontier: frontier.remove(None)
-    explored.append(currentState)
-    if (winnerCheck(currentState.board)):
-      print("Goal state achieved!")
-      return currentState
-    else:
-      nodes_list = Actions(currentState)
-      for item in nodes_list:
-        if (not inExploredOrFrontier(item, explored) or not inExploredOrFrontier(item, frontier)):
-          frontier.append(item)
+  # while (frontier):
+  currentState = frontier.pop(0)
+    # printArray(currentState.board)
+    # if None in frontier: frontier.remove(None)
+  explored.append(currentState)
+  if (winnerCheck(currentState.board)):
+    print("Goal state achieved!")
+    return currentState
+  else:
+    Actions(currentState)
+      
+    #   nodes_list = Actions(currentState)
+    #   for item in nodes_list:
+    #     if (not inExploredOrFrontier(item, explored) or not inExploredOrFrontier(item, frontier)):
+    #       frontier.append(item)
     
-    print(f"Explored States: {len(explored)}")
+    # print(f"Explored States: {len(explored)}")
 
 def findEmptyCell(terminal_list):
   for i in range(3):
