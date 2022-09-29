@@ -69,13 +69,6 @@ def addTiles():
 
 	return tiles_list
 
-def printTiles(tiles_list, terminal_list, screen, TILE_COLOR, FONT_COLOR):
-  for i in range(3):
-    for j in range(3):
-      if (terminal_list[i][j] != 0):
-        tile = tiles_list[i][j]
-        tile.drawTile(screen, terminal_list, i, j, TILE_COLOR, FONT_COLOR)
-      
 def swapCells(list, i, j, row_clicked, col_clicked):
   terminal_temp = list[i][j]
   list[i][j] = list[row_clicked][col_clicked]

@@ -34,6 +34,12 @@ def findPath(currentState):
 
   return actions_string_list, len(actions_string_list)
 
+def findEmpty(terminal_list):
+  for i in range(3):
+    for j in range(3):
+      if terminal_list[i][j] == 0:
+        return i, j
+
 def copyBoard(currentStateBoard):
   new_board = []
   for i in range(3):
@@ -45,102 +51,55 @@ def copyBoard(currentStateBoard):
   return new_board
   
 
+def swapping(currentState, row_index, col_index, action_string):
+  new_board = copyBoard(currentState.board)
+  i, j = findEmpty(new_board)
+  print("=======")
+  print("PARENT")
+  printArray(new_board)
+  print("=======")
+
+  try:
+    if i+row_index >= 0 and j+col_index >= 0: # the row and column being checked must be greater than 0
+      new_node_board = swapCells(new_board, i, j, i+row_index, j+col_index) # swap the two cells
+      i, j = findEmpty(new_board)
+      newNode = Node(new_node_board, i, j, action_string, currentState) # instantiate Node
+
+      print("------------------")
+      printArray(newNode.board)
+      print(f"Parent Node: {newNode.parent}")
+      print(f"Empty Cell Coordinate: ({newNode.empty_row}, {newNode.empty_column})")
+      print("------------------")
+
+      return newNode
+    return -1
+  except IndexError:
+    return -1
+
+def addToActions(newNode, action_list):
+  if (newNode != -1):
+    action_list.append(newNode)
+
+  return action_list
+
+# gets all possible actions and put all of it into action_list
 def Actions(currentState):
   action_list = []
 
-  # for non-adjacent cells whose neighbor is 0
-  new_board = copyBoard(currentState.board)
-  i, j = findEmptyCell(new_board)
+  newNode = swapping(currentState, -1, 0, "U")
+  action_list = addToActions(newNode, action_list)
 
-  try:
-    if i-1 >= 0 and j >= 0:
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
+  newNode = swapping(currentState, 0, +1, "R")
+  action_list = addToActions(newNode, action_list)
+  
+  newNode = swapping(currentState, 1, 0, "D")
+  action_list = addToActions(newNode, action_list)
 
-      temp_board = swapCells(new_board, i, j, i-1, j)
-      new_node = Node(temp_board, i-1, j, "U", currentState)
-      action_list.append(new_node)
+  newNode = swapping(currentState, 0, -1, "L")
+  action_list = addToActions(newNode, action_list)
 
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
-
-  try:
-    if i >= 0 and j+1 >= 0:
-      new_board = copyBoard(currentState.board)
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
-
-      temp_board = swapCells(new_board, i, j, i, j+1)
-      new_node = Node(temp_board, i, j+1, "R", currentState)
-      action_list.append(new_node)
-
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
-
-  try:
-    if i+1 >= 0 and j >= 0:
-      new_board = copyBoard(currentState.board)
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
-
-      temp_board = swapCells(new_board, i+1, j, i, j)
-      new_node = Node(temp_board, i+1, j, "D", currentState)
-      action_list.append(new_node)
-
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
-
-  try:
-    if i >= 0 and j-1 >= 0:
-      new_board = copyBoard(currentState.board)
-      #swapping to UP
-      print("====PARENT====")
-      printArray(currentState.board)
-      print("==============\n")
-
-      temp_board = swapCells(new_board, i, j-1, i, j)
-      new_node = Node(temp_board, i, j-1, "L", currentState)
-      action_list.append(new_node)
-
-      print("=====CHILD=====")
-      printArray(new_node.board)
-      print()
-      print(f"({new_node.empty_row}, {new_node.empty_column})")
-      print(new_node.action)
-      print(new_node.parent)
-      print("===============\n")
-  except IndexError:
-    pass
 
   print(len(action_list))
-
   return action_list
 
 def inExploredOrFrontier(node, explored):
@@ -149,25 +108,24 @@ def inExploredOrFrontier(node, explored):
       return True
   return False
 
-def BFS_DFS(initial):
+def BFS_DFS(initial, index_popped):
   frontier = [initial]
   explored = []
 
   while (frontier):
-    currentState = frontier.pop(-1)
-      # printArray(currentState.board)
-      # if None in frontier: frontier.remove(None)
+    currentState = frontier.pop(index_popped) # depending on the data structure used (BFS/DFS)
+    printArray(currentState.board)
     explored.append(currentState)
+    print(f"Explored States: {len(explored)}")
     if (winnerCheck(currentState.board)):
       print("Goal state achieved!")
       return currentState
     else:
+      # gets all the elements of the list then loop to check if it already exists in explored or frontier
       nodes_list = Actions(currentState)
       for item in nodes_list:
-        if (not inExploredOrFrontier(item, explored) or not inExploredOrFrontier(item, frontier)):
+        if (not inExploredOrFrontier(item, explored) and not inExploredOrFrontier(item, frontier)):
           frontier.append(item)
-    
-    print(f"Explored States: {len(explored)}")
 
 def findEmptyCell(terminal_list):
   for i in range(3):
@@ -188,3 +146,14 @@ def readOutputFile():
 def clickedBfsDfs(screen, dfs, bfs, bfs_pink, dfs_pink, bfs_black, dfs_black):
   bfs.drawTile(screen, bfs_pink, bfs_black)
   dfs.drawTile(screen, dfs_pink, dfs_black)
+
+def printTilesOnClick(tiles_list, terminal_list, screen, PINK_100, BLACK, TILE_COLOR, FONT_COLOR, row_index, col_index):
+  for i in range(3):
+    for j in range(3):
+      if (terminal_list[i][j] != 0):
+        tile = tiles_list[i][j]
+        if i == row_index and j == col_index:
+          tile.drawTile(screen, terminal_list, i, j, TILE_COLOR, FONT_COLOR)
+        else:
+          tile.drawTile(screen, terminal_list, i, j, PINK_100, BLACK)
+        
