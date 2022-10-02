@@ -3,10 +3,12 @@
 # CMSC 170 X-4L
 # Exer 01
 
+from pickle import NONE
 import pygame
 from gameplay_functions import *
 from settings import *
 from bfs_dfs import *
+from a_star_func import *
 import os
 
 os.system('cls')
@@ -54,7 +56,7 @@ while is_running:
   if (not is_next_running): # if playable
     printTilesOnClick(tiles_list, terminal_list, screen, PINK_100, BLACK, BLACK, PINK_100, None, None)
   else: # if not playable because user already clicked bfs/dfs
-    printTilesOnClick(tiles_list, terminal_list, screen, PINK_100, BLACK, BLACK_50, PINK_50, i, j)
+    printTilesOnClick(tiles_list, terminal_list, screen, PINK_100, BLACK, PINK_50, BLACK_50, i, j)
     
   # if number of inversions is odd, it is not solvable
   if not is_solvable:
@@ -62,6 +64,7 @@ while is_running:
 
   if winnerCheck(terminal_list):
     screen.blit(won, textRect_won)
+    printTilesOnClick(tiles_list, terminal_list, screen, PINK_50, BLACK_50, PINK_50, BLACK_50, None, None)
     is_playable = False # user will not be able to click anymore
     is_path_seen = False
 
@@ -78,22 +81,41 @@ while is_running:
 
   bfs = Button(400, 50, "BFS")
   dfs = Button(400, 90, "DFS")
-  clickedBfsDfs(screen, dfs, bfs, PINK_100, PINK_100, BLACK, BLACK)
+  a_star = Button(400, 130, "A*")
+  clickedBfsDfs(screen, dfs, bfs, a_star, PINK_100, PINK_100, BLACK, BLACK, BLACK, PINK_100)
 
   next = Button(400, 325, "Next")
   if (is_next_running):
     next.drawTile(screen, PINK_100, BLACK)
 
-  if (is_bfs_clicked == "1"):
-    clickedBfsDfs(screen, dfs, bfs, PINK_50, PINK_100, BLACK_50, BLACK)
+  if (is_bfs_clicked == "1"): # bfs button clicked
+    clickedBfsDfs(screen, dfs, bfs, a_star, PINK_50, PINK_100, BLACK_50, BLACK, BLACK, PINK_100)
 
-  elif (is_bfs_clicked == "2"):
-    clickedBfsDfs(screen, dfs, bfs, PINK_100, PINK_50, BLACK_50, BLACK_50)
+  elif (is_bfs_clicked == "2"): # dfs button clicked
+    clickedBfsDfs(screen, dfs, bfs, a_star, PINK_100, PINK_50, BLACK_50, BLACK_50, BLACK, PINK_100)
+  
+  elif (is_bfs_clicked == "3"): # a_star button clicked
+    clickedBfsDfs(screen, dfs, bfs, a_star, PINK_100, PINK_100, BLACK, BLACK, BLACK_50, PINK_50)
+
 
   # GAMEPLAY
   if event.type == pygame.MOUSEBUTTONDOWN:
     try:
       x, y = pygame.mouse.get_pos()
+
+      # every next button clicked, actions_index which serves as the index for the list of actions generated is incremented by 1
+      if next.isClicked(x, y):
+        if (currentState and not winnerCheck(terminal_list)):
+          i, j = findEmptyCell(terminal_list)
+          
+          # swap and update the board with the string actions as the indicator on where the cells will move 
+          match actions_string_list[actions_index]:
+            case "L": terminal_list = swapCells(terminal_list, i, j, i, j-1)
+            case "R": terminal_list = swapCells(terminal_list, i, j, i, j+1)
+            case "U": terminal_list = swapCells(terminal_list, i, j, i-1, j)
+            case "D": terminal_list = swapCells(terminal_list, i, j, i+1, j)
+          actions_index += 1
+
 
       if (x <= 400): # tiles are being checked/played
         row_clicked, col_clicked = calculateCoordinate(tiles_list, x, y)
@@ -107,20 +129,6 @@ while is_running:
             gameplay(terminal_list, row_clicked, col_clicked)
 
       else: # specification for BFS and DFS
-
-        # every next button clicked, actions_index which serves as the index for the list of actions generated is incremented by 1
-        if next.isClicked(x, y):
-          if (currentState and not winnerCheck(terminal_list)):
-            i, j = findEmptyCell(terminal_list)
-            
-            # swap and update the board with the string actions as the indicator on where the cells will move 
-            match actions_string_list[actions_index]:
-              case "L": terminal_list = swapCells(terminal_list, i, j, i, j-1)
-              case "R": terminal_list = swapCells(terminal_list, i, j, i, j+1)
-              case "U": terminal_list = swapCells(terminal_list, i, j, i-1, j)
-              case "D": terminal_list = swapCells(terminal_list, i, j, i+1, j)
-            actions_index += 1
-
         # click whether user wants to solve using dfs or bfs
         if (dfs.isClicked(x, y)):
           is_bfs_clicked = "2"
@@ -132,8 +140,13 @@ while is_running:
           print(f"Checking for the solution using {bfs.name}")
           to_be_solved = "bfs"
 
+        elif (a_star.isClicked(x, y)):
+          is_bfs_clicked = "3"
+          print(f"Checking for the solution using {a_star.name}")
+          to_be_solved = "a_star"
+
         # When solution button is clicked and bfs or dfs is selected
-        if (solution.isClicked(x, y) and (to_be_solved == "bfs" or to_be_solved == "dfs")):
+        if (solution.isClicked(x, y) and (to_be_solved == "bfs" or to_be_solved == "dfs" or to_be_solved == "a_star")):
             is_playable = False # user cannot play anymore
 
             terminal_list = readFile() # resets the board
@@ -146,12 +159,15 @@ while is_running:
               is_next_running = True
 
               i, j = findEmptyCell(terminal_list)
-              initial = Node(terminal_list, i, j, None, None)
+              initial = Node(terminal_list, i, j, None, None, None, None, None)
               
               if (to_be_solved == "bfs"): # inset at the first index, remove at the last index
                 currentState = BFS_DFS(initial, 0)
-              else: # insert at the last index, remove at the last index
+              elif (to_be_solved == "dfs"): # insert at the last index, remove at the last index
                 currentState = BFS_DFS(initial, -1)
+              else: # A*
+                
+                AStar(initial)
 
               # returns the list of actions as well as the path cost
               actions_string_list, path_cost = findPath(currentState)

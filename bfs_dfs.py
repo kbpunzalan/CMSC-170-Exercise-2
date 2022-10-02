@@ -3,12 +3,15 @@ import time
 from gameplay_functions import winnerCheck, swapCells, printArray
 
 class Node:
-  def __init__(self, board, empty_row, empty_column, action, parent):
+  def __init__(self, board, empty_row, empty_column, action, parent, g, h, f):
     self.board = board
     self.empty_row = empty_row
     self.empty_column = empty_column
     self.action = action
     self.parent = parent
+    self.g = g
+    self.h = h
+    self.f = f
 
 class Button:
   def __init__(self, x_pos, y_pos, name):
@@ -63,7 +66,7 @@ def swapping(currentState, row_index, col_index, action_string):
     if i+row_index >= 0 and j+col_index >= 0: # the row and column being checked must be greater than 0
       new_node_board = swapCells(new_board, i, j, i+row_index, j+col_index) # swap the two cells
       i, j = findEmpty(new_board)
-      newNode = Node(new_node_board, i, j, action_string, currentState) # instantiate Node
+      newNode = Node(new_node_board, i, j, action_string, currentState, None, None, None) # instantiate Node
 
       print("------------------")
       printArray(newNode.board)
@@ -143,9 +146,10 @@ def readOutputFile():
     data = file.read()
     return data
 
-def clickedBfsDfs(screen, dfs, bfs, bfs_pink, dfs_pink, bfs_black, dfs_black):
+def clickedBfsDfs(screen, dfs, bfs, a_star, bfs_pink, dfs_pink, bfs_black, dfs_black,  a_star_black, a_star_pink):
   bfs.drawTile(screen, bfs_pink, bfs_black)
   dfs.drawTile(screen, dfs_pink, dfs_black)
+  a_star.drawTile(screen, a_star_pink, a_star_black)
 
 def printTilesOnClick(tiles_list, terminal_list, screen, PINK_100, BLACK, TILE_COLOR, FONT_COLOR, row_index, col_index):
   for i in range(3):
