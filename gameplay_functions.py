@@ -2,10 +2,10 @@ from tiles import Tiles
 from settings import *
 
 # terminal functions
-def readFile():
+def readFile(filename):
   list = []
   # from https://stackoverflow.com/questions/61617165/input-data-from-file-to-2d-array-in-python
-  with open("read.in", "r") as file:
+  with open(filename, "r") as file:
     for line in file:
       newList = line.split()
       newList = [int(c) for c in newList] # put as int before appending to the list

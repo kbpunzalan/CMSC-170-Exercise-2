@@ -70,7 +70,6 @@ def swapping(currentState, row_index, col_index, action_string):
         # g will be incremented once we instantiated again (in A* function)
       newNode = Node(new_node_board, i, j, action_string, currentState, currentState.g, 0, 0)
       
-
       print("------------------")
       printArray(newNode.board)
       print(f"Parent Node: {newNode.parent}")

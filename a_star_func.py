@@ -31,6 +31,10 @@ def removeMinF(openList):
 
   return openList.pop(minF)
 
+def findDuplicate(openList, item):
+  for duplicate in openList:
+    if duplicate.board == item.board:
+      return duplicate
 
 def AStar(initial):
   openList = [initial] # same as frontier
@@ -46,13 +50,10 @@ def AStar(initial):
 
     node_list = Actions(bestNode)
     for item in node_list:
-      # print(item)
       item.g += 1
       item.h = computeH(item.board)
       item.f = item.g + item.h
-
-      if (not inExploredOrFrontier(item, openList) and not inExploredOrFrontier(item, closedList)):
-        # item.parent = bestNode
+      
+      duplicate = findDuplicate(openList, item)
+      if (not inExploredOrFrontier(item, openList) and not inExploredOrFrontier(item, closedList)) or (inExploredOrFrontier(item, openList) and item.g < duplicate.g):  
         openList.append(item)
-
-# or (inExploredOrFrontier(item, openList) and item.g < duplicate.g)

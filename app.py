@@ -3,19 +3,19 @@
 # CMSC 170 X-4L
 # Exer 01
 
-from pickle import NONE
 import pygame
 from gameplay_functions import *
 from settings import *
 from bfs_dfs import *
 from a_star_func import *
 import os
+from tkinter import filedialog as fd
 
 os.system('cls')
 
 # MAIN FILE
 terminal_list = []
-terminal_list = readFile()
+terminal_list = readFile('read.in')
 
 tiles_list = []
 tiles_list = addTiles() 
@@ -38,6 +38,7 @@ is_solvable = True
 if not isSolvable(terminal_list):
   is_solvable = False
 
+is_file_dialog = False
 is_path_seen = False
 is_next_running = False
 is_playable = True
@@ -76,6 +77,9 @@ while is_running:
     screen.blit(path_list_text, path_list_rect)
 
   # BFS-DFS Specs
+  select_file = Button(400, 245, "Select File")
+  select_file.drawTile(screen, PINK_100, BLACK)
+
   solution = Button(400, 285, "Solution")
   solution.drawTile(screen, PINK_100, BLACK)
 
@@ -130,6 +134,13 @@ while is_running:
 
       else: # specification for BFS and DFS
         # click whether user wants to solve using dfs or bfs
+        if (select_file.isClicked(x, y)):
+          filename = fd.askopenfilename()
+          
+          terminal_list = readFile(filename)
+          is_file_dialog = True
+          print(filename)
+
         if (dfs.isClicked(x, y)):
           is_bfs_clicked = "2"
           print(f"Checking for the solution using {dfs.name}")
@@ -149,8 +160,11 @@ while is_running:
         if (solution.isClicked(x, y) and (to_be_solved == "bfs" or to_be_solved == "dfs" or to_be_solved == "a_star")):
             is_playable = False # user cannot play anymore
 
-            terminal_list = readFile() # resets the board
-            
+            if is_file_dialog:
+              terminal_list = readFile(filename) # resets the board
+            else:
+              terminal_list = readFile('read.in') # resets the board
+
             # user cannot choose bfs or dfs if the puzzle is not solvable
             if not isSolvable(terminal_list): 
               print("Puzzle is Not Solvable!")
