@@ -159,15 +159,14 @@ while is_running:
               is_next_running = True
 
               i, j = findEmptyCell(terminal_list)
-              initial = Node(terminal_list, i, j, None, None, None, None, None)
+              initial = Node(terminal_list, i, j, None, None, 0, 0, 0)
               
               if (to_be_solved == "bfs"): # inset at the first index, remove at the last index
                 currentState = BFS_DFS(initial, 0)
               elif (to_be_solved == "dfs"): # insert at the last index, remove at the last index
                 currentState = BFS_DFS(initial, -1)
               else: # A*
-                
-                AStar(initial)
+                currentState = AStar(initial)
 
               # returns the list of actions as well as the path cost
               actions_string_list, path_cost = findPath(currentState)

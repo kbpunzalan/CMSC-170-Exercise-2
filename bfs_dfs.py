@@ -66,7 +66,10 @@ def swapping(currentState, row_index, col_index, action_string):
     if i+row_index >= 0 and j+col_index >= 0: # the row and column being checked must be greater than 0
       new_node_board = swapCells(new_board, i, j, i+row_index, j+col_index) # swap the two cells
       i, j = findEmpty(new_board)
-      newNode = Node(new_node_board, i, j, action_string, currentState, None, None, None) # instantiate Node
+      # instantiate Node; g of the parent will only be necessary for A*
+        # g will be incremented once we instantiated again (in A* function)
+      newNode = Node(new_node_board, i, j, action_string, currentState, currentState.g, 0, 0)
+      
 
       print("------------------")
       printArray(newNode.board)
