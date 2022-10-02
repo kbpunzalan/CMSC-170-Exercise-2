@@ -135,11 +135,14 @@ while is_running:
       else: # specification for BFS and DFS
         # click whether user wants to solve using dfs or bfs
         if (select_file.isClicked(x, y)):
-          filename = fd.askopenfilename()
-          
-          terminal_list = readFile(filename)
-          is_file_dialog = True
-          print(filename)
+          try:              
+            filename = fd.askopenfilename()
+            
+            terminal_list = readFile(filename)
+            is_file_dialog = True
+            print(filename)
+          except:
+              print("Invalid file")
 
         if (dfs.isClicked(x, y)):
           is_bfs_clicked = "2"

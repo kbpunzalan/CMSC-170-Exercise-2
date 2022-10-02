@@ -23,7 +23,7 @@ class Button:
     pygame.draw.rect(screen, TILE_COLOR, [self.x_pos, self.y_pos, 100, 30], 0, 15)
 
     font = pygame.font.Font('freesansbold.ttf', 15)
-    screen.blit(font.render(self.name, True, FONT_COLOR), [(self.x_pos+self.x_pos+40)/2, (self.y_pos+self.y_pos+15)/2])
+    screen.blit(font.render(self.name, True, FONT_COLOR), [(self.x_pos+self.x_pos+25)/2, (self.y_pos+self.y_pos+15)/2])
 
   def isClicked(self, x, y):
     time.sleep(0.05)
