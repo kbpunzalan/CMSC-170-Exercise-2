@@ -120,7 +120,6 @@ while is_running:
             case "D": terminal_list = swapCells(terminal_list, i, j, i+1, j)
           actions_index += 1
 
-
       if (x <= 400): # tiles are being checked/played
         row_clicked, col_clicked = calculateCoordinate(tiles_list, x, y)
 
